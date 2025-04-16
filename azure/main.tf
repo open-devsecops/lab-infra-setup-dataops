@@ -130,7 +130,7 @@ provider "azurerm" {
 
 # 创建资源组
 resource "azurerm_resource_group" "nyc_taxi" {
-  name     = "rg-nyctaxi"
+  name     = "rg-nyc-taxi"
   location = "westus"
 }
 
@@ -178,7 +178,7 @@ resource "azurerm_mssql_server" "nyc_taxi_sql" {
 
   azuread_administrator {
     login_username = "AzureAD Admin"
-    object_id      = "9058c66d-f5b9-4a7b-9ad6-c7c03a2724e6" # 替换为你的 Azure AD 对象 ID
+    object_id      = var.azuread_administrator_object_id
   }
 
   tags = {
@@ -288,7 +288,7 @@ output "storage_account_name" {
 
 output "storage_account_key" {
   value = azurerm_storage_account.nyc_taxi_storage.primary_access_key
-  sensitive = false
+  sensitive = true
 }
 
 output "sql_server_fqdn" {

@@ -75,17 +75,17 @@ variable "vpn_network_address" {
 }
 
 # Added manually
-variable "aws_account_id" {
- type        = string
- default     = "535002888110"
-}
+# variable "aws_account_id" {
+#  type        = string
+#  default     = "535002888110"
+# }
 
 # Added manually
 variable "subscription_id" {
   description = "The Azure subscription ID"
   type        = string
-  # default     = "8e2e5e49-34ac-47a0-b9cb-2a79a3bba0c9"
-  default     = "e2270428-9eaa-4af7-b909-d190829450ae"
+  # default     = ""
+  default     = ""
 }
 
 variable "region" {
@@ -109,4 +109,9 @@ variable "synapse_sql_admin_password" {
   type        = string
   sensitive   = true
   default = "P@ssw0rd!2025"
+}
+
+variable "azuread_administrator_object_id" {
+  description = "azuread_administrator_object_id"
+  default = "" # 替换为你的 Azure AD 对象 ID
 }
