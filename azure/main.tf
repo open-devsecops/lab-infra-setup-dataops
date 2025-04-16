@@ -232,7 +232,7 @@ resource "azurerm_synapse_workspace" "nyc_taxi_synapse" {
   sql_administrator_login          = "sqladminuser"
   sql_administrator_login_password = "P@ssw0rd!2025"
 
-  managed_virtual_network_enabled = true
+  managed_virtual_network_enabled = false
  
   identity {
     type = "SystemAssigned"
