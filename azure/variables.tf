@@ -75,16 +75,15 @@ variable "vpn_network_address" {
 }
 
 # Added manually
-# variable "aws_account_id" {
-#  type        = string
-#  default     = "535002888110"
-# }
+variable "aws_account_id" {
+ type        = string
+ default     = "535002888110"
+}
 
 # Added manually
 variable "subscription_id" {
   description = "The Azure subscription ID"
   type        = string
-  # default     = ""
   default     = ""
 }
 
