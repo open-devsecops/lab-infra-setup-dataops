@@ -88,14 +88,9 @@ stages:
         sudo python3 -m pip install --upgrade "urllib3>=1.26.0" chardet databricks-cli jq
         databricks jobs configure --version=2.1
         export PATH="/root/.local/bin:$PATH"
-
-        # Configure Databricks CLI
-        # databricks configure --token \
-        #  --host "$(databricksWorkspaceURL)" \
-        #  --token "$(dbToken)"
         
         # Verify notebook file exists
-        NOTEBOOK_PATH="$(System.DefaultWorkingDirectory)/notebooks/process_data.py"
+        NOTEBOOK_PATH="$(System.DefaultWorkingDirectory)/process_data.py"
         echo "##[debug]Notebook path: $NOTEBOOK_PATH"
         if [ ! -f "$NOTEBOOK_PATH" ]; then
           echo "##[error]Notebook file not found at $NOTEBOOK_PATH"
@@ -104,23 +99,15 @@ stages:
         
         # Upload Python script as notebook
         echo "##[section]Uploading notebook to Databricks..."
-        databricks workspace import \
-          --format SOURCE \
-          --language PYTHON \
-          "$NOTEBOOK_PATH" \
-          "/Shared/process_data"
+        databricks workspace import --format SOURCE --language PYTHON --overwrite "$NOTEBOOK_PATH" "/Shared/process_data"
         
         # Create and run job
         echo "##[section]Submitting Databricks job..."
+        # Updated jobJson section using existing cluster
         jobJson=$(cat <<EOF
         {
           "name": "NYC Taxi Data Cleaning",
-          "new_cluster": {
-            "spark_version": "15.4.x-scala2.12",
-            "node_type_id": "Standard_DS3_v2",
-            "num_workers": 0,
-            "single_node": true
-          },
+          "existing_cluster_id": "$(clusterId)",
           "notebook_task": {
             "notebook_path": "/Shared/process_data",
             "base_parameters": {
