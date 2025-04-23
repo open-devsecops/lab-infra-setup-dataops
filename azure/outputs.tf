@@ -6,15 +6,7 @@ output "please_note" {
   ]
 }
 
-# output "SSH" {
-#   value = "ssh -i ${var.ssh_key_name}.pem ${var.vm_admin_username}@${azurerm_public_ip.public_ip.ip_address}"
-# }
-
-# output "vm_public_ip" {
-#   value       = azurerm_public_ip.public_ip.ip_address
-#   description = "The public IP address of the virtual machine."
-# }
-
-# output "acr_login_server" {
-#   value = azurerm_container_registry.acr.login_server
-# }
+output "repo_url" {
+  description = "Azure DevOps Git Repository URL"
+  value       = azuredevops_git_repository.nyc_taxi.remote_url
+}
