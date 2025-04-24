@@ -1,21 +1,8 @@
-# Added manually
 variable "subscription_id" {
   description = "The Azure subscription ID"
   type        = string
   default     = "e2270428-9eaa-4af7-b909-d190829450ae"
 }
-
-# variable "synapse_sql_admin_password" {
-#   description = "Password for Synapse SQL administrator"
-#   type        = string
-#   sensitive   = true
-#   default = "P@ssw0rd!2025"
-# }
-
-# variable "azuread_administrator_object_id" {
-#   description = "azuread_administrator_object_id"
-#   default = "2f8d6ddd-e0cc-4936-8dd2-9dedcd805303" # 替换为你的 Azure AD 对象 ID
-# }
 
 variable "azuredevops_pat" {
   description = "Azure DevOps Personal Access Token"
@@ -47,7 +34,7 @@ variable "databricks_pat" {
   description = "Databricks Personal Access Token"
   type        = string
   sensitive   = true
-  default     = "dapi8c83bada47ca4c2547aaa3ec2d61ff6e-3"
+  default     = "dapi0513aabec3c14eb70917141458eceebe-3"
 }
 
 variable "azuredevops_org" {
@@ -62,8 +49,15 @@ variable "ado_org_url" {
   default     = "https://dev.azure.com/xinyiw12"
 }
 
-variable "admin_ip" {
-  description = "Administrator IP address for SSH access"
-  default     = "172.190.187.195/32"
+variable "sql_admin_user" {
+  description = "SQL administrator username"
+  type        = string
+  default     = "sqladminuser"
 }
 
+variable "sql_admin_password" {
+  description = "SQL administrator password"
+  type        = string
+  sensitive   = true
+  default     = "wxy12345!"
+}

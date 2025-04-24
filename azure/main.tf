@@ -26,7 +26,7 @@ resource "azurerm_resource_group" "nyc_taxi" {
 }
 
 resource "azurerm_storage_account" "nyc_taxi_storage" {
-  name                     = "nyctaxistorage${random_string.suffix.result}"
+  name                     = "nyctaxistoragedataops"
   resource_group_name      = azurerm_resource_group.nyc_taxi.name
   location                 = azurerm_resource_group.nyc_taxi.location
   account_tier             = "Standard"
@@ -81,7 +81,7 @@ resource "azurerm_data_factory_dataset_azure_blob" "blob_dataset" {
   filename = "yellow_tripdata_2025-01.parquet"
 
   dynamic "schema_column" {
-    for_each = range(20) # Adjust based on actual schema
+    for_each = range(20)
     content {
       name = "column${schema_column.key}"
       type = "String"
@@ -122,7 +122,6 @@ resource "azurerm_data_factory_pipeline" "nyc_taxi_ingestion" {
   ])
 }
 
-# 创建 Databricks 工作区
 resource "azurerm_databricks_workspace" "nyc_taxi_databricks" {
   name                = "wksp-nyc-taxi"
   resource_group_name = azurerm_resource_group.nyc_taxi.name
@@ -130,7 +129,6 @@ resource "azurerm_databricks_workspace" "nyc_taxi_databricks" {
   sku                 = "standard"
 }
 
-# Automate Databricks Cluster Creation
 provider "databricks" {
   alias = "workspace"
   host  = azurerm_databricks_workspace.nyc_taxi_databricks.workspace_url
@@ -163,20 +161,6 @@ resource "random_string" "suffix" {
   special = false
 }
 
-output "storage_account_name" {
-  value = azurerm_storage_account.nyc_taxi_storage.name
-}
-
-output "storage_account_key" {
-  value = azurerm_storage_account.nyc_taxi_storage.primary_access_key
-  sensitive = true
-}
-
-output "databricks_workspace_url" {
-  value = "https://${azurerm_databricks_workspace.nyc_taxi_databricks.workspace_url}"
-}
-
-# Azure DevOps Provider
 provider "azuredevops" {
   org_service_url       = "https://dev.azure.com/${var.azuredevops_org}"
   personal_access_token = var.azuredevops_pat
@@ -202,7 +186,6 @@ resource "azuredevops_serviceendpoint_azurerm" "azure_connection" {
   azurerm_subscription_name = "Your Azure Subscription"
 }
 
-# Create Variable Group
 resource "azuredevops_variable_group" "db_secrets" {
   project_id   = azuredevops_project.nyc_taxi.id
   name         = "databricks-secrets"
@@ -284,18 +267,4 @@ resource "azurerm_synapse_sql_pool" "nyctaxipool" {
 resource "azurerm_storage_container" "synapse_temp" {
   name                  = "synapse-temp"
   storage_account_name  = azurerm_storage_account.nyc_taxi_storage.name
-}
-
-# Variables for sensitive values
-variable "sql_admin_user" {
-  description = "SQL administrator username"
-  type        = string
-  default     = "sqladminuser"
-}
-
-variable "sql_admin_password" {
-  description = "SQL administrator password"
-  type        = string
-  sensitive   = true
-  default     = "wxy12345!"
 }

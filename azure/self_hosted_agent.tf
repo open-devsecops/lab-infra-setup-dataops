@@ -18,7 +18,7 @@ resource "azurerm_network_security_group" "agent_nsg" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "22"
-    source_address_prefix      = var.admin_ip
+    source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
 
@@ -50,8 +50,6 @@ resource "azurerm_subnet" "agent_subnet" {
   virtual_network_name = azurerm_virtual_network.agent_vnet.name
   address_prefixes     = ["10.0.1.0/24"]
   service_endpoints    = ["Microsoft.Storage"]
-  
-  //network_security_group_id = azurerm_network_security_group.agent_nsg.id
 }
 
 # Public IP
@@ -174,18 +172,4 @@ resource "azurerm_virtual_machine_extension" "agent_setup" {
       ./svc.sh start
     EOF
   })
-}
-
-# Outputs
-output "agent_vm_public_ip" {
-  value = azurerm_public_ip.agent_pip.ip_address
-}
-
-output "ssh_command" {
-  value = "ssh -i ./azure_vm_key.pem azureuser@${azurerm_public_ip.agent_pip.ip_address}"
-}
-
-output "ssh_private_key" {
-  value     = tls_private_key.ssh.private_key_pem
-  sensitive = true
 }
