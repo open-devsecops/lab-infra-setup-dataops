@@ -63,16 +63,24 @@ resource "azurerm_data_factory_linked_service_azure_blob_storage" "blob_nyc_taxi
   connection_string   = azurerm_storage_account.nyc_taxi_storage.primary_connection_string
 }
 
-resource "azurerm_data_factory_dataset_http" "http_dataset" {
-  name                = "HttpNycTaxiDataset"
+resource "azurerm_data_factory_dataset_http" "http_dataset_yellow" {
+  name                = "HttpNycTaxiDatasetYellow"
   data_factory_id     = azurerm_data_factory.nyc_taxi_adf.id
   linked_service_name = azurerm_data_factory_linked_service_web.http_nyc_taxi.name
-  relative_url   = "yellow_tripdata_2025-01.parquet"
-  request_method = "GET"
+  relative_url        = "yellow_tripdata_2025-01.parquet"  # Adjust path as needed
+  request_method      = "GET"
 }
 
-resource "azurerm_data_factory_dataset_azure_blob" "blob_dataset" {
-  name                = "BlobNycTaxiDataset"
+resource "azurerm_data_factory_dataset_http" "http_dataset_green" {
+  name                = "HttpNycTaxiDatasetGreen"
+  data_factory_id     = azurerm_data_factory.nyc_taxi_adf.id
+  linked_service_name = azurerm_data_factory_linked_service_web.http_nyc_taxi.name
+  relative_url        = "green_tripdata_2025-01.parquet"   # Adjust path as needed
+  request_method      = "GET"
+}
+
+resource "azurerm_data_factory_dataset_azure_blob" "blob_dataset_yellow" {
+  name                = "BlobNycTaxiDatasetYellow"
 
   data_factory_id     = azurerm_data_factory.nyc_taxi_adf.id
   linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.blob_nyc_taxi.name
@@ -89,34 +97,62 @@ resource "azurerm_data_factory_dataset_azure_blob" "blob_dataset" {
   }
 }
 
+resource "azurerm_data_factory_dataset_azure_blob" "blob_dataset_green" {
+  name                = "BlobNycTaxiDatasetGreen"
+
+  data_factory_id     = azurerm_data_factory.nyc_taxi_adf.id
+  linked_service_name = azurerm_data_factory_linked_service_azure_blob_storage.blob_nyc_taxi.name
+
+  path     = "nyc-taxi-raw/green/2025/01"
+  filename = "green_tripdata_2025-01.parquet"
+
+  dynamic "schema_column" {
+    for_each = range(20)
+    content {
+      name = "column${schema_column.key}"
+      type = "String"
+    }
+  }
+}
+
 # ADF Pipeline
 resource "azurerm_data_factory_pipeline" "nyc_taxi_ingestion" {
   name                = "CopyNYCTaxiData"
   data_factory_id     = azurerm_data_factory.nyc_taxi_adf.id
 
-  activities_json = jsonencode([
+   activities_json = jsonencode([
+    # Yellow Data Copy
     {
-      name = "CopyFromHTTPToBlob"
+      name = "CopyYellowFromHTTPToBlob"
       type = "Copy"
-      inputs = [
-        {
-          referenceName = azurerm_data_factory_dataset_http.http_dataset.name
-          type          = "DatasetReference"
-        }
-      ]
-      outputs = [
-        {
-          referenceName = azurerm_data_factory_dataset_azure_blob.blob_dataset.name
-          type          = "DatasetReference"
-        }
-      ]
+      inputs = [{
+        referenceName = azurerm_data_factory_dataset_http.http_dataset_yellow.name
+        type          = "DatasetReference"
+      }]
+      outputs = [{
+        referenceName = azurerm_data_factory_dataset_azure_blob.blob_dataset_yellow.name
+        type          = "DatasetReference"
+      }]
       typeProperties = {
-        source = {
-          type = "BinarySource"
-        }
-        sink = {
-          type = "BlobSink"
-        }
+        source = { type = "BinarySource" }
+        sink   = { type = "BlobSink" }
+      }
+    },
+    # Green Data Copy
+    {
+      name = "CopyGreenFromHTTPToBlob"
+      type = "Copy"
+      inputs = [{
+        referenceName = azurerm_data_factory_dataset_http.http_dataset_green.name
+        type          = "DatasetReference"
+      }]
+      outputs = [{
+        referenceName = azurerm_data_factory_dataset_azure_blob.blob_dataset_green.name
+        type          = "DatasetReference"
+      }]
+      typeProperties = {
+        source = { type = "BinarySource" }
+        sink   = { type = "BlobSink" }
       }
     }
   ])
@@ -267,4 +303,11 @@ resource "azurerm_synapse_sql_pool" "nyctaxipool" {
 resource "azurerm_storage_container" "synapse_temp" {
   name                  = "synapse-temp"
   storage_account_name  = azurerm_storage_account.nyc_taxi_storage.name
+}
+
+# Grant Synapse access to the storage account
+resource "azurerm_role_assignment" "synapse_storage_access" {
+  scope                = azurerm_storage_account.nyc_taxi_storage.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_synapse_workspace.nyctaxi.identity[0].principal_id
 }

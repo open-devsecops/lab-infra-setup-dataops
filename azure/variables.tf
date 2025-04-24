@@ -34,7 +34,7 @@ variable "databricks_pat" {
   description = "Databricks Personal Access Token"
   type        = string
   sensitive   = true
-  default     = "dapi0513aabec3c14eb70917141458eceebe-3"
+  default     = "dapi7d9eabbf460b02c4a5aa24f33c4756ef-3"
 }
 
 variable "azuredevops_org" {
