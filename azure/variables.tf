@@ -1,52 +1,52 @@
 variable "subscription_id" {
   description = "The Azure subscription ID"
   type        = string
-  default     = "e2270428-9eaa-4af7-b909-d190829450ae"
+  default     = "ADD_YOUR_AZURE_SUBSCRIPTION_ID"
 }
 
 variable "azuredevops_pat" {
   description = "Azure DevOps Personal Access Token"
   type        = string
   sensitive   = true
-  default     = "E3ZhWpuKIBzfzHlNHI16UekDnNW5jY5UdoB7XKm3FKeKJGQAoS4eJQQJ99BDACAAAAABRVnhAAASAZDO1Yrh"
+  default     = "ADD_YOUR_AZURE_DEVOPS_PERSONAL_ACCESS_TOKEN"
 }
 
 variable "azure_client_id" {
   description = "Azure Service Principal Client ID"
   type        = string
-  default     = "8c1c956d-edbc-479d-8caf-a24c3c460517"
+  default     = "ADD_YOUR_AZURE_CLIENT_ID"
 }
 
 variable "azure_client_secret" {
   description = "Azure Service Principal Client Secret"
   type        = string
   sensitive   = true
-  default     = "sYe8Q~RoflprpSRFaZKrrnx5fP5et_xZKSeOkarj"
+  default     = "ADD_YOUR_AZURE_CLIENT_SECRET"
 }
 
 variable "azure_tenant_id" {
   description = "Azure Tenant ID"
   type        = string
-  default     = "f6b6dd5b-f02f-441a-99a0-162ac5060bd2"
+  default     = "ADD_YOUR_AZURE_TENANT_ID"
 }
 
 variable "databricks_pat" {
   description = "Databricks Personal Access Token"
   type        = string
   sensitive   = true
-  default     = "dapi7d9eabbf460b02c4a5aa24f33c4756ef-3"
+  default     = "ADD_YOUR_DATABRICKS_PERSONAL_ACCESS_TOKEN"
 }
 
 variable "azuredevops_org" {
   description = "Azure DevOps organization name"
   type        = string
-  default     = "xinyiw12"
+  default     = "ADD_YOUR_AZURE_DEVOPS_ORG_NAME"
 }
 
 variable "ado_org_url" {
   description = "Azure DevOps organization URL"
   type        = string
-  default     = "https://dev.azure.com/xinyiw12"
+  default     = "https://dev.azure.com/<ADD_YOUR_AZURE_DEVOPS_ORG_NAME>"
 }
 
 variable "sql_admin_user" {
@@ -59,5 +59,5 @@ variable "sql_admin_password" {
   description = "SQL administrator password"
   type        = string
   sensitive   = true
-  default     = "wxy12345!"
+  default     = "ADD_YOUR_SQL_ADMIN_PASSWORD"
 }

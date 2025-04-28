@@ -33,6 +33,9 @@ resource "azurerm_storage_account" "nyc_taxi_storage" {
   account_replication_type = "LRS"
   account_kind             = "StorageV2"
   is_hns_enabled           = true
+  lifecycle {
+    ignore_changes = [primary_access_key]
+  }
 }
 
 resource "azurerm_storage_container" "nyc_taxi_raw" {
@@ -174,7 +177,7 @@ provider "databricks" {
 resource "databricks_cluster" "nyc_taxi" {
   provider = databricks.workspace
 
-  cluster_name            = "nyc-taxi-cluster-2"
+  cluster_name            = "nyc-taxi-cluster"
   spark_version           = "15.4.x-scala2.12"
   node_type_id            = "Standard_DS3_v2"
   autotermination_minutes = 120
@@ -237,6 +240,23 @@ resource "azuredevops_variable_group" "db_secrets" {
   variable {
     name  = "clusterId"
     value = databricks_cluster.nyc_taxi.id
+  }
+
+  variable {
+    name  = "SYNAPSE_USER"
+    value = var.sql_admin_user
+  }
+
+  variable {
+    name  = "SYNAPSE_PASSWORD"
+    secret_value = var.sql_admin_password
+    is_secret = true
+  }
+
+  variable {
+    name         = "STORAGE_ACCOUNT_KEY"
+    secret_value = azurerm_storage_account.nyc_taxi_storage.primary_access_key
+    is_secret    = true
   }
 }
 
@@ -311,3 +331,12 @@ resource "azurerm_role_assignment" "synapse_storage_access" {
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azurerm_synapse_workspace.nyctaxi.identity[0].principal_id
 }
+
+resource "azurerm_storage_blob" "taxi_zone_lookup" {
+  name                   = "taxi_zone_lookup.csv"
+  storage_account_name   = azurerm_storage_account.nyc_taxi_storage.name
+  storage_container_name = azurerm_storage_container.nyc_taxi_raw.name
+  type                   = "Block"
+  source                 = "taxi_zone_lookup.csv" # Ensure this file exists in your TF directory
+}
+
