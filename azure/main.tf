@@ -232,6 +232,11 @@ resource "azuredevops_variable_group" "db_secrets" {
   allow_access = true
 
   variable {
+    name  = "databricksWorkspaceUrl"
+    value = azurerm_databricks_workspace.nyc_taxi_databricks.workspace_url
+  }
+  
+  variable {
     name  = "dbToken"
     secret_value = var.databricks_pat
     is_secret = true
