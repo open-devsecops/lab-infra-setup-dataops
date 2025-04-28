@@ -173,3 +173,9 @@ resource "azurerm_virtual_machine_extension" "agent_setup" {
     EOF
   })
 }
+
+resource "azuredevops_agent_queue" "project_queue" {
+  project_id    = azuredevops_project.nyc_taxi.id
+  agent_pool_id = azuredevops_agent_pool.self_hosted.id
+  depends_on    = [azuredevops_project.nyc_taxi]
+}

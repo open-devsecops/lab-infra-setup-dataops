@@ -265,6 +265,8 @@ resource "azuredevops_build_definition" "main_pipeline" {
   project_id = azuredevops_project.nyc_taxi.id
   name       = "NYC Taxi Pipeline"
 
+  agent_pool_name = azuredevops_agent_pool.self_hosted.name
+
   repository {
     repo_type   = "TfsGit"
     repo_id     = azuredevops_git_repository.nyc_taxi.id
@@ -340,3 +342,9 @@ resource "azurerm_storage_blob" "taxi_zone_lookup" {
   source                 = "taxi_zone_lookup.csv" # Ensure this file exists in your TF directory
 }
 
+resource "azuredevops_resource_authorization" "agent_auth" {
+  project_id  = azuredevops_project.nyc_taxi.id
+  resource_id = azuredevops_agent_queue.project_queue.id
+  authorized  = true
+  type        = "queue"
+}
