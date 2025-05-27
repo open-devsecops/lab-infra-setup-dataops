@@ -174,26 +174,6 @@ provider "databricks" {
   azure_workspace_resource_id = azurerm_databricks_workspace.nyc_taxi_databricks.id
 }
 
-# resource "databricks_cluster" "nyc_taxi" {
-#   provider = databricks.workspace
-
-#   cluster_name            = "nyc-taxi-cluster"
-#   spark_version           = "15.4.x-scala2.12"
-#   node_type_id            = "Standard_DS3_v2"
-#   autotermination_minutes = 120
-
-#   spark_conf = {
-#     "spark.databricks.cluster.profile" : "singleNode"
-#     "spark.master" : "local[*]"
-#   }
-
-#   custom_tags = {
-#     "ResourceClass" = "SingleNode"
-#   }
-
-#   num_workers = 0
-# }
-
 resource "random_string" "suffix" {
   length  = 6
   upper   = false
