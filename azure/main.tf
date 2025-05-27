@@ -333,7 +333,7 @@ resource "azuredevops_git_repository" "nyc_taxi" {
 
 # Create Synapse Workspace
 resource "azurerm_synapse_workspace" "nyctaxi" {
-  name                = "synapse-nyctaxi-test-2"
+  name                = "synapse-nyctaxi"
   resource_group_name = "rg-nyc-taxi"
   location            = "westus"
   storage_data_lake_gen2_filesystem_id = "${azurerm_storage_account.nyc_taxi_storage.primary_dfs_endpoint}${azurerm_storage_container.synapse_temp.name}"
