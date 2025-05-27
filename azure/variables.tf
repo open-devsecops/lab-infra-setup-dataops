@@ -59,5 +59,5 @@ variable "sql_admin_password" {
   description = "SQL administrator password"
   type        = string
   sensitive   = true
-  default     = "ADD_YOUR_SQL_ADMIN_PASSWORD"
+  default     = "Sql12345!"
 }
