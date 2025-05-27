@@ -1,7 +1,7 @@
 # Create resource group for agent
 resource "azurerm_resource_group" "agent_rg" {
   name     = "ado-agents-rg"
-  location = "East US"
+  location = "West US"
 }
 
 # Network Security Group for Agent

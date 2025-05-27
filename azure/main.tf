@@ -22,11 +22,11 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "nyc_taxi" {
   name     = "rg-nyc-taxi"
-  location = "eastus"
+  location = "westus"
 }
 
 resource "azurerm_storage_account" "nyc_taxi_storage" {
-  name                     = "nyctaxistoragedataops"
+  name                     = "nyctaxistorage${random_string.suffix.result}"
   resource_group_name      = azurerm_resource_group.nyc_taxi.name
   location                 = azurerm_resource_group.nyc_taxi.location
   account_tier             = "Standard"
@@ -45,7 +45,7 @@ resource "azurerm_storage_container" "nyc_taxi_raw" {
 }
 
 resource "azurerm_data_factory" "nyc_taxi_adf" {
-  name                = "adf-nyc-taxi-25"
+  name                = "adf-nyc-taxi-${random_string.suffix.result}"
   location            = azurerm_resource_group.nyc_taxi.location
   resource_group_name = azurerm_resource_group.nyc_taxi.name
 }
@@ -174,12 +174,55 @@ provider "databricks" {
   azure_workspace_resource_id = azurerm_databricks_workspace.nyc_taxi_databricks.id
 }
 
+# resource "databricks_cluster" "nyc_taxi" {
+#   provider = databricks.workspace
+
+#   cluster_name            = "nyc-taxi-cluster"
+#   spark_version           = "15.4.x-scala2.12"
+#   node_type_id            = "Standard_DS3_v2"
+#   autotermination_minutes = 120
+
+#   spark_conf = {
+#     "spark.databricks.cluster.profile" : "singleNode"
+#     "spark.master" : "local[*]"
+#   }
+
+#   custom_tags = {
+#     "ResourceClass" = "SingleNode"
+#   }
+
+#   num_workers = 0
+# }
+
+resource "random_string" "suffix" {
+  length  = 6
+  upper   = false
+  special = false
+}
+
+resource "databricks_instance_pool" "high_availability_pool" {
+  provider                = databricks.workspace
+  instance_pool_name      = "high-availability-pool"
+  idle_instance_autotermination_minutes = 120
+
+  node_type_id            = "Standard_D4s_v3"
+  min_idle_instances      = 2 
+   disk_spec {
+    disk_type {
+      azure_disk_volume_type = "PREMIUM_LRS" 
+    }
+    disk_count  = 1
+    disk_size   = 100  
+  }
+  preloaded_spark_versions = ["15.4.x-scala2.12"]
+}
+
 resource "databricks_cluster" "nyc_taxi" {
   provider = databricks.workspace
 
   cluster_name            = "nyc-taxi-cluster"
   spark_version           = "15.4.x-scala2.12"
-  node_type_id            = "Standard_DS3_v2"
+  instance_pool_id        = databricks_instance_pool.high_availability_pool.id  
   autotermination_minutes = 120
 
   spark_conf = {
@@ -191,13 +234,7 @@ resource "databricks_cluster" "nyc_taxi" {
     "ResourceClass" = "SingleNode"
   }
 
-  num_workers = 0
-}
-
-resource "random_string" "suffix" {
-  length  = 6
-  upper   = false
-  special = false
+  num_workers = 0  
 }
 
 provider "azuredevops" {
@@ -296,9 +333,9 @@ resource "azuredevops_git_repository" "nyc_taxi" {
 
 # Create Synapse Workspace
 resource "azurerm_synapse_workspace" "nyctaxi" {
-  name                = "synapse-nyctaxi-test"
+  name                = "synapse-nyctaxi-test-2"
   resource_group_name = "rg-nyc-taxi"
-  location            = "eastus"
+  location            = "westus"
   storage_data_lake_gen2_filesystem_id = "${azurerm_storage_account.nyc_taxi_storage.primary_dfs_endpoint}${azurerm_storage_container.synapse_temp.name}"
 
   sql_administrator_login          = var.sql_admin_user
